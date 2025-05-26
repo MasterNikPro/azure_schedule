@@ -1,1 +1,1 @@
-# azure_schedule
+# azure_vm

@@ -1,0 +1,54 @@
+name: Sync to MasterNikPro/azure_schedule
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-to-azure-schedule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
+
+      - name: Clone public repo (azure_schedule)
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MasterNikPro/azure_schedule.git schedule-repo
+          
+          # Копіюємо ВСІ файли, крім .git, у schedule-repo
+          rsync -av --exclude='.git' ./ schedule-repo/
+
+          cd schedule-repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git checkout -B auto-sync-branch
+
+          git add .
+          git diff-index --quiet HEAD || git commit -m "🔄 Sync from ${{ github.repository }}" || echo "Nothing to commit"
+          git push --force origin auto-sync-branch
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Create PR to azure_schedule
+        run: |
+          sleep 10
+          gh pr create \
+            --title "🔄 Auto PR from ${{ github.repository }}" \
+            --body "Automated sync PR from private repo." \
+            --base main \
+            --head auto-sync-branch \
+            --repo MasterNikPro/azure_schedule || echo "PR already exists or failed."
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
