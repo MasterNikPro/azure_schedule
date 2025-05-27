@@ -1,5 +1,5 @@
 locals {
-  config = jsondecode(file("${path.module}/../config.json"))
+  config = jsondecode(file("${path.module}/config.json"))
 
   vnet_name           = "vnet-${local.config.project.environment}"
   location            = local.config.project.location_azurerm

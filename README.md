@@ -1,1 +1,1 @@
-# azure_networks
+# azure_vm
