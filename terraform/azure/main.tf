@@ -1,13 +1,3 @@
-provider "azurerm" {
-  features {}
-
-  client_id       = var.client_id
-  client_secret   = var.client_secret
-  subscription_id = var.subscription_id
-  tenant_id       = var.tenant_id
-
-}
-
 module "postgresql" {
   source = "./modules/postgresql"
 
@@ -22,4 +12,15 @@ module "postgresql" {
     ManagedBy   = "terraform"
     Project     = local.project.name
   }
+}
+
+module "network" {
+  source              = "./modules/networks"
+  vnet_name           = local.vnet_name
+  location            = local.location
+  resource_group_name = local.resource_group_name
+  address_space       = local.address_space
+  subnet_names        = local.subnet_names
+  subnet_prefixes     = local.subnet_prefixes
+  nsgs                = local.nsg_list
 }
