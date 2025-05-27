@@ -1,4 +1,3 @@
-
 output "database_server_name" {
   description = "The name of the first PostgreSQL Flexible Server"
   value       = module.postgresql.server_name
@@ -34,3 +33,6 @@ output "vnet_id" {
   value = module.network.vnet_id
 }
 
+output "ports" {
+	value = module.vm.ports
+}

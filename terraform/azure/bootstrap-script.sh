@@ -2,26 +2,27 @@
 set -euo pipefail
 
 CONFIG_PATH=$1
-KEY_FILE="${2%.json}.json"
+SERVICE_PRINCIPAL_NAME=$(grep -oP '"terraform_username":\s*"\K[^"]+' "$CONFIG_PATH")
 SERVICE_PRINCIPAL_ROLE="Owner"
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 ASSIGNEE_ID=$(az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query "[0].id" -o tsv)
+KEY_FILE="${2%.json}.json"
 
-SERVICE_PRINCIPAL_NAME=$(sed -n 's/.*"terraform_username": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
+STORAGE_ACCOUNT_NAME="$(grep -oP '"storage_account_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")$(date +%s)"
+CONTAINER_NAME=$(grep -oP '"bucket_state_name":\s*"\K[^"]+' "$CONFIG_PATH")
+RESOURCE_GROUP=$(grep -oP '"resource_group_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")
+LOCATION=$(grep -oP '"location_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")
 
-STORAGE_ACCOUNT_NAME="$(sed -n 's/.*"storage_account_name_azurerm": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")$(date +%s)"
-CONTAINER_NAME=$(sed -n 's/.*"bucket_state_name": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
-RESOURCE_GROUP=$(sed -n 's/.*"resource_group_name_azurerm": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
-LOCATION=$(sed -n 's/.*"location_azurerm": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
+KEY_VAULT_NAME="$(grep -oP '"key_vault_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")$(date +%s)"
+DB_USERNAME=$(grep -oP '"db-username":\s*"\K[^"]+' "$CONFIG_PATH")
+DB_PASS=$(grep -oP '"db-pass":\s*"\K[^"]+' "$CONFIG_PATH")
 
-KEY_VAULT_NAME="$(sed -n 's/.*"key_vault_name_azurerm": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")$(date +%s)"
-DB_USERNAME=$(sed -n 's/.*"db-username": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
-DB_PASS=$(sed -n 's/.*"db-pass": *"\([^"]*\)".*/\1/p' "$CONFIG_PATH")
 SECRET_NAME_DB_USERNAME=$(grep -o 'db-username[:]*' "$CONFIG_PATH")
 SECRET_NAME_DB_PASS=$(grep -o 'db-pass[:]*' "$CONFIG_PATH")
 #########################################################################
 if [[ -z "$SUBSCRIPTION_ID" ]]; then
-	echo "✅ Error: Unable to retrieve Azure subscription ID."
+	echo "Error: Unable to retrieve Azure subscription ID."
+	echo "=== Error: Unable to retrieve Azure subscription ID."
 	exit 1
 else
 	echo "=== Project's ID: '$SUBSCRIPTION_ID' ==="
@@ -29,7 +30,9 @@ else
 fi
 #########################################################################
 if az ad sp list --display-name $SERVICE_PRINCIPAL_NAME | grep -q '"displayName": $SERVICE_PRINCIPAL_NAME'; then
-    echo "✅ Service principal exists."
+    echo "Service principal exists."
+=======
+    echo "=== Service principal exists. ==="
 	echo
 else
     echo "=== Service principal does not exist. Creating... ==="
@@ -41,7 +44,7 @@ fi
 #########################################################################
 echo "=== Creating a resource group: $RESOURCE_GROUP ==="
 if az group show --name "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo "✅ Resource group '$RESOURCE_GROUP' exists."
+	echo " Resource group '$RESOURCE_GROUP' exists."
 	echo
 else
 	echo "=== Resource group '$RESOURCE_GROUP' does not exist. Creating... ==="
@@ -64,22 +67,18 @@ KEY_VAULT_ROLES=(
 )
 SCOPE=$(az keyvault show --name "$KEY_VAULT_NAME" --resource-group "$RESOURCE_GROUP" --query "id" -o tsv)
 for role in "${KEY_VAULT_ROLES[@]}"; do
-	echo "- Assigmenting role: '$role'..."
+	echo "=== Assigmenting role: '$role'... ==="
 	az role assignment create \
 		--assignee "$ASSIGNEE_ID" \
 		--role "$role" \
-		--scope "$SCOPE" || echo "=== Failed to assignment $role ==="
+		--scope "$SCOPE" || echo "=== Failed to assignment: $role ==="
 done
 echo
 #########################################################################
 echo "=== Logging... ===" 
-#AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
-#AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
-#AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
-
-AZURE_CLIENT_ID=$(sed -n 's/.*"appId": *"\([^"]*\)".*/\1/p' "$KEY_FILE")
-AZURE_CLIENT_SECRET=$(sed -n 's/.*"password": *"\([^"]*\)".*/\1/p' "$KEY_FILE")
-AZURE_TENANT_ID=$(sed -n 's/.*"tenant": *"\([^"]*\)".*/\1/p' "$KEY_FILE")
+AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
+AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
+AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
 
 az login --service-principal \
 	--username "$AZURE_CLIENT_ID" \
@@ -97,17 +96,17 @@ createSecret() {
 	SECRET_VALUE=$3
 
 	if check_secret_exists "$KEY_VAULT_NAME" "$SECRET_NAME"; then
-		echo "✅ Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'."
+		echo "=== Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'."
 		echo
 	else
 		echo "=== Creating secret '$SECRET_NAME'... ==="
 		if az keyvault secret set --vault-name "$KEY_VAULT_NAME" \
 				--name "$SECRET_NAME" \
 				--value "$SECRET_VALUE"; then
-			echo "✅ Secret '$SECRET_NAME' created and value added."
+			echo " Secret '$SECRET_NAME' created and value added."
 			echo
 		else
-			echo "❌ Failed to create secret '$SECRET_NAME'."
+			echo " Failed to create secret '$SECRET_NAME'."
 			exit 1
 		fi
 	fi
@@ -117,7 +116,7 @@ createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_PASS" "$DB_PASS"
 #########################################################################
 if az storage account show --name "$STORAGE_ACCOUNT_NAME" \
 		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-    echo "✅ Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists."
+    echo " Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists."
 	echo
 else
 	echo "=== Setting Up Azure Storage for Terraform State ==="
@@ -132,7 +131,7 @@ if az storage container show \
 		--name "$CONTAINER_NAME" \
 		--account-name "$STORAGE_ACCOUNT_NAME" \
 		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo "✅ Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'."
+	echo " Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'."
 	echo
 else
 	echo "=== Creating the container $CONTAINER_NAME ==="
