@@ -29,6 +29,18 @@ output "database_version" {
   value       = module.postgresql.postgresql_version
 }
 
+# Database outputs
+output "postgresql_instances" {
+  description = "Information about created PostgreSQL instances"
+  value       = module.postgresql.postgresql_instances
+}
+
+output "database_connection_strings" {
+  description = "Database connection information"
+  value       = module.postgresql.database_connection_strings
+  sensitive   = false
+}
+
 output "config_summary" {
   description = "Summary of configuration loaded from config.json"
   value = {
@@ -37,10 +49,6 @@ output "config_summary" {
     location = local.project.location_azurerm
     resource_group = local.project.resource_group_name_azurerm
     total_databases = length(local.db_instances)
-    key_vault_integration = {
-      auth_enabled = var.use_key_vault_for_auth
-      db_credentials_enabled = var.use_key_vault_for_db_credentials
-      key_vault_name = local.project.key_vault_name_azurerm
-    }
+    postgresql_databases = length(local.postgresql_instances)
   }
 }

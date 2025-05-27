@@ -58,31 +58,9 @@ Project-level settings are read from the `project` section in `config.json`:
 
 ## Usage
 
-### Option 1: Key Vault Integration (Recommended)
-
-1. **Configure your databases** in `config.json` under the `databases` array
-2. **Run the enhanced bootstrap script**:
-   ```bash
-   chmod +x bootstrap-enhanced.sh
-   ./bootstrap-enhanced.sh config.json service-principal
-   ```
-3. **Enable Key Vault in `terraform.tfvars`**:
-   ```hcl
-   use_key_vault_for_db_credentials = true
-   use_key_vault_for_auth = false  # Set to true for full Key Vault auth
-   ```
-4. **Run Terraform**:
-   ```bash
-   terraform plan
-   terraform apply
-   ```
-
-### Option 2: Traditional Variables
-
 1. **Configure your databases** in `config.json` under the `databases` array
 2. **Set credentials** in `terraform.tfvars`:
    ```hcl
-   use_key_vault_for_db_credentials = false
    db_admin_username = "postgres"
    db_admin_password = "YourSecurePassword123!"
    ```
@@ -129,31 +107,6 @@ The main configuration is simplified and only needs to:
 - **Environment-aware**: Uses project environment and naming conventions
 - **Backward Compatible**: Maintains legacy outputs for existing integrations
 
-## Retrieving Database Connection Information
-
-### Using the Helper Script
-
-After deployment, use the helper script to get connection information:
-
-```bash
-# Get connection info for all databases
-./get-db-connection.sh your-key-vault-name
-
-# Get connection info for a specific database
-./get-db-connection.sh your-key-vault-name maindb
-```
-
-### Manual Key Vault Retrieval
-
-```bash
-# Get database credentials from Key Vault
-az keyvault secret show --vault-name "your-key-vault" --name "db-username" --query "value" -o tsv
-az keyvault secret show --vault-name "your-key-vault" --name "db-pass" --query "value" -o tsv
-
-# Get database host from Terraform output
-terraform output -json postgresql_instances
-```
-
 ## Example Output
 
 After running `terraform apply`, you'll see output similar to:
@@ -169,11 +122,5 @@ postgresql_instances = {
     "storage_mb" = 32768
     "version" = "14"
   }
-}
-
-key_vault_info = {
-  "key_vault_name" = "DB-secrets-new1234567890"
-  "key_vault_uri" = "https://db-secrets-new1234567890.vault.azure.net/"
-  "secrets_stored" = ["db-username", "db-pass"]
 }
 ``` 
