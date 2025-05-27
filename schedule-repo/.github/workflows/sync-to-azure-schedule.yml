@@ -48,7 +48,8 @@ jobs:
           cd schedule-repo
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git checkout -b ${{ steps.vars.outputs.branch }} || git checkout ${{ steps.vars.outputs.branch }}
+          DATE=$(date +"%Y-%m-%d %H:%M")
+          git checkout -b ${{ steps.vars.outputs.branch }}-$DATE || git checkout ${{ steps.vars.outputs.branch }}
           rsync -av --exclude='.git' ../ ./
           git add .
           git commit -m "Sync from azure_networks by ${{ steps.vars.outputs.branch }}" || echo "No changes to commit"
