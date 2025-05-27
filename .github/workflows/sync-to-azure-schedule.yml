@@ -1,0 +1,67 @@
+name: Sync to azure_schedule
+
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-to-schedule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo (azure_networks)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Git user
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Create sync branch
+        run: |
+          git checkout -b auto-sync-branch
+
+      - name: Push branch to origin
+        run: |
+          git push --force https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MasterNikPro/azure_networks.git auto-sync-branch
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Push branch to azure_schedule (using authenticated HTTPS)
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/MasterNikPro/azure_schedule.git schedule-repo
+          cd schedule-repo
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git checkout -b auto-sync-branch || git checkout auto-sync-branch
+          rsync -av --exclude='.git' ../ ./
+          git add .
+          git commit -m " Sync from azure_networks" || echo "No changes to commit"
+          git push --force origin auto-sync-branch
+
+
+      - name: Create PR in azure_schedule
+        run: |
+          gh pr create \
+            --title " Auto PR from azure_networks" \
+            --body "This PR syncs latest changes from private repo." \
+            --base main \
+            --head MasterNikPro:auto-sync-branch \
+            --repo MasterNikPro/azure_schedule
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
