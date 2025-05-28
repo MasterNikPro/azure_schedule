@@ -3,7 +3,7 @@ module "postgresql" {
 
   database_instances     = local.postgresql_instances
   resource_group_name    = local.project.resource_group_name_azurerm
-  
+
   administrator_password = var.use_key_vault_for_db_credentials ? data.azurerm_key_vault_secret.db_password.value : var.db_admin_password
   administrator_login    = var.use_key_vault_for_db_credentials ? data.azurerm_key_vault_secret.db_username.value : var.db_admin_username
 
@@ -14,6 +14,7 @@ module "postgresql" {
   }
 }
 
+
 module "vm" {
   source                      = "./modules/vm"
   ssh_keys                    = local.config.project.keys
@@ -23,6 +24,7 @@ module "vm" {
   resource_group_name_azurerm = local.config.project.resource_group_name_azurerm
   location_azurerm            = local.config.project.location_azurerm
   azurerm_subnet              = module.network.subnet_ids[0]
+  nsg_ids                     = module.network.nsg_ids
 }
 
 module "network" {

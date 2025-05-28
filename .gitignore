@@ -38,11 +38,9 @@ ansible/inventory/
 terraform.rc
 
 # Ignore JSON files
-config.json
 keys.json
 
 # Ignore IDE files
-.idea/
 *.iml
 .vscode/
 *.suo
@@ -54,3 +52,5 @@ keys.json
 
 # Ignore dump files
 *.dump
+# Ignore test.tf and inventory
+

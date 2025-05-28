@@ -1,6 +1,6 @@
 
 locals {
-  config = jsondecode(file("${path.module}/config.json"))
+  config = jsondecode(file("${path.module}/../config.json"))
 
   db_instances = local.config.databases
   
@@ -37,9 +37,9 @@ locals {
   location            = local.config.project.location_azurerm
   resource_group_name = local.config.project.resource_group_name_azurerm
 
-  address_space       = [local.config.network[0].vpc_cidr]
-  subnet_names        = [for s in local.config.network[0].subnets : s.name]
-  subnet_prefixes     = [for s in local.config.network[0].subnets : s.cidr]
+  address_space   = [local.config.network[0].vpc_cidr]
+  subnet_names    = [for s in local.config.network[0].subnets : s.name]
+  subnet_prefixes = [for s in local.config.network[0].subnets : s.cidr]
 
   nsg_list = [
     for sg in local.config.security_groups : {
@@ -62,13 +62,13 @@ locals {
   ]
 
   address_map = {
-     "public"           = "0.0.0.0/0"
-    "internal"          = local.config.network[0].vpc_cidr
-    "frontend-sg"       = "10.0.2.4"
-    "backend-sg"        = "10.0.2.5"
-    "redis-sg"          = "10.0.2.6"
-    "db-sg"             = "10.0.3.4"
-    "reverse-proxy-sg"  = "10.0.1.4"
-    "bastion-sg"        = "10.0.1.5"
+    "public"           = "0.0.0.0/0"
+    "internal"         = local.config.network[0].vpc_cidr
+    "frontend-sg"      = "10.0.2.4"
+    "backend-sg"       = "10.0.2.5"
+    "redis-sg"         = "10.0.2.6"
+    "db-sg"            = "10.0.3.4"
+    "reverse-proxy-sg" = "10.0.1.4"
+    "bastion-sg"       = "10.0.1.5"
   }
 }

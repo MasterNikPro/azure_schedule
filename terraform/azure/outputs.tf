@@ -1,11 +1,6 @@
-output "database_server_name" {
-  description = "The name of the first PostgreSQL Flexible Server"
-  value       = module.postgresql.server_name
-}
-
-output "database_fqdn" {
-  description = "The FQDN of the first PostgreSQL Flexible Server"
-  value       = module.postgresql.server_fqdn
+### VM ###
+output "ports" {
+  value = module.vm.ports
 }
 
 output "database_server_id" {
@@ -33,6 +28,3 @@ output "vnet_id" {
   value = module.network.vnet_id
 }
 
-output "ports" {
-	value = module.vm.ports
-}
