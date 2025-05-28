@@ -65,10 +65,10 @@ resource "azurerm_linux_virtual_machine" "main" {
 	name                = each.value.name
 	location            = var.location_azurerm
 	resource_group_name = var.resource_group_name_azurerm
-
+	
 	size                = local.size_map.small
 	admin_username      = var.hostname
-
+	
 	network_interface_ids = [
 		azurerm_network_interface.main[each.key].id
 	]

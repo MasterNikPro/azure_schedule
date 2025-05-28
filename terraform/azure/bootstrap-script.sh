@@ -2,16 +2,11 @@
 set -euo pipefail
 
 CONFIG_PATH=$1
-SERVICE_PRINCIPAL_NAME=$(grep -oP '"terraform_username":\s*"\K[^"]+' "$CONFIG_PATH")
 SERVICE_PRINCIPAL_ROLE="Owner"
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 ASSIGNEE_ID=$(az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query "[0].id" -o tsv)
 KEY_FILE="${2%.json}.json"
 
-STORAGE_ACCOUNT_NAME="$(grep -oP '"storage_account_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")$(date +%s)"
-CONTAINER_NAME=$(grep -oP '"bucket_state_name":\s*"\K[^"]+' "$CONFIG_PATH")
-RESOURCE_GROUP=$(grep -oP '"resource_group_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")
-LOCATION=$(grep -oP '"location_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")
 
 KEY_VAULT_NAME="$(grep -oP '"key_vault_name_azurerm":\s*"\K[^"]+' "$CONFIG_PATH")$(date +%s)"
 DB_USERNAME=$(grep -oP '"db-username":\s*"\K[^"]+' "$CONFIG_PATH")
@@ -62,6 +57,8 @@ KEY_VAULT_ROLES=(
 	"Key Vault Administrator"
 )
 SCOPE=$(az keyvault show --name "$KEY_VAULT_NAME" --resource-group "$RESOURCE_GROUP" --query "id" -o tsv)
+ASSIGNEE_ID=$(az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query "[0].id" -o tsv)
+
 for role in "${KEY_VAULT_ROLES[@]}"; do
 	echo "=== Assigmenting role: '$role'... ==="
 	az role assignment create \
