@@ -7,6 +7,7 @@ module "vm" {
   resource_group_name_azurerm = local.config.project.resource_group_name_azurerm
   location_azurerm            = local.config.project.location_azurerm
   azurerm_subnet              = module.network.subnet_ids[0]
+  nsg_ids                     = module.network.nsg_ids
 }
 
 module "network" {

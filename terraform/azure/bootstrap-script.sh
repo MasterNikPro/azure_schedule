@@ -40,7 +40,7 @@ fi
 #########################################################################
 echo "=== Creating a resource group: $RESOURCE_GROUP ==="
 if az group show --name "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo " Resource group '$RESOURCE_GROUP' exists."
+	echo "=== Resource group '$RESOURCE_GROUP' exists. ==="
 	echo
 else
 	echo "=== Resource group '$RESOURCE_GROUP' does not exist. Creating... ==="
@@ -54,7 +54,7 @@ if az keyvault create --name "$KEY_VAULT_NAME" \
 		--location "$LOCATION"; then
 	echo
 else
-	echo "=== Failed to create( The Azure Key Vault '$KEY_VAULT_NAME' already exists ==="
+	echo
 fi
 #########################################################################
 echo "=== Assigmenting roles ==="
@@ -92,14 +92,14 @@ createSecret() {
 	SECRET_VALUE=$3
 
 	if check_secret_exists "$KEY_VAULT_NAME" "$SECRET_NAME"; then
-		echo "=== Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'."
+		echo "=== Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'. ==="
 		echo
 	else
 		echo "=== Creating secret '$SECRET_NAME'... ==="
 		if az keyvault secret set --vault-name "$KEY_VAULT_NAME" \
 				--name "$SECRET_NAME" \
 				--value "$SECRET_VALUE"; then
-			echo " Secret '$SECRET_NAME' created and value added."
+			echo "=== Secret '$SECRET_NAME' created and value added. ==="
 			echo
 		else
 			echo " Failed to create secret '$SECRET_NAME'."
@@ -112,7 +112,7 @@ createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_PASS" "$DB_PASS"
 #########################################################################
 if az storage account show --name "$STORAGE_ACCOUNT_NAME" \
 		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-    echo " Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists."
+    echo "=== Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists. ==="
 	echo
 else
 	echo "=== Setting Up Azure Storage for Terraform State ==="
@@ -127,7 +127,7 @@ if az storage container show \
 		--name "$CONTAINER_NAME" \
 		--account-name "$STORAGE_ACCOUNT_NAME" \
 		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo " Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'."
+	echo "=== Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'. ==="
 	echo
 else
 	echo "=== Creating the container $CONTAINER_NAME ==="
@@ -148,6 +148,8 @@ startTerraform() {
 		-backend-config="container_name=$2" \
 		-backend-config="key=terraform.tfstate" \
 		-backend-config="access_key=$3"
+  	
+   	terraform plan && terraform apply --auto-approve
 }
 startTerraform "$STORAGE_ACCOUNT_NAME" "$CONTAINER_NAME" "$ACCOUNT_KEY"
 #########################################################################
