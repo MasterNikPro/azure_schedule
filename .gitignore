@@ -1,8 +1,45 @@
+# Local .terraform directories
+**/.terraform/*
 
-terraform/azure/terraform.tfstate
-terraform/azure/terraform.tfstate.backup
-terraform/azure/config.json
-terraform/azure/.terraform/providers/registry.terraform.io/hashicorp/azurerm/4.30.0/linux_amd64/terraform-provider-azurerm_v4.30.0_x5
-terraform/azure/.terraform/providers/registry.terraform.io/hashicorp/azurerm/4.30.0/linux_amd64/LICENSE.txt
-terraform/azure/.terraform/modules/modules.json
-terraform/azure/.terraform.lock.hcl
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .terraform.lock files
+.terraform.lock.hcl
+**/.terraform.lock.hcl
+terraform/gcp/.terraform.lock.hcl
+# Crash log files
+crash.log
+
+# Ignore override files as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore test.tf and inventory
+test.tf
+ansible/inventory/
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore JSON files
+config.json
+keys.json
+
+# Ignore IDE files
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Ignore dump files
+*.dump

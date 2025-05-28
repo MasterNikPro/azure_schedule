@@ -1,3 +1,4 @@
-output "vnet_id" {
-  value = module.network.vnet_id
+### VM ###
+output "ports" {
+  value = module.vm.ports
 }

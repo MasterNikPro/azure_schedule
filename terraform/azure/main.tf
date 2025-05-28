@@ -1,3 +1,14 @@
+module "vm" {
+  source                      = "./modules/vm"
+  ssh_keys                    = local.config.project.keys
+  vm_instances                = local.config.vm_instances
+  hostname                    = local.config.project.vm_hostname
+  terraform_username          = local.config.project.terraform_username
+  resource_group_name_azurerm = local.config.project.resource_group_name_azurerm
+  location_azurerm            = local.config.project.location_azurerm
+  azurerm_subnet              = module.network.subnet_ids[0]
+}
+
 module "network" {
   source              = "./modules/networks"
   vnet_name           = local.vnet_name
