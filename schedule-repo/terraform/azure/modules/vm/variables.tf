@@ -24,5 +24,3 @@ variable "hostname" {}
 variable "terraform_username" {}
 
 variable "azurerm_subnet" {}
-
-variable "nsg_ids" {}
