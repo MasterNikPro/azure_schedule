@@ -31,4 +31,4 @@ resource "azurerm_postgresql_flexible_server" "this" {
     Database = each.key
     Network  = each.value.network
   })
-} 
+}

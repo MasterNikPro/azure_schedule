@@ -1,6 +1,3 @@
-# Resource Configuration
-# Note: resource_group_name and location are now read from config.json
-# These variables are kept for backward compatibility
 variable "resource_group_name" {
   description = "Name of the resource group (overridden by config.json)"
   type        = string
