@@ -20,54 +20,56 @@ SECRET_NAME_DB_USERNAME=$(grep -o 'db-username[:]*' "$CONFIG_PATH")
 SECRET_NAME_DB_PASS=$(grep -o 'db-pass[:]*' "$CONFIG_PATH")
 #########################################################################
 if [[ -z "$SUBSCRIPTION_ID" ]]; then
-	echo "=== Error: Unable to retrieve Azure subscription ID."
-	exit 1
+  echo "=== Error: Unable to retrieve Azure subscription ID."
+  exit 1
 else
-	echo "=== Project's ID: '$SUBSCRIPTION_ID' ==="
-	echo
+  echo "=== Project's ID: '$SUBSCRIPTION_ID' ==="
+  echo
 fi
 #########################################################################
 if az ad sp list --display-name $SERVICE_PRINCIPAL_NAME | grep -q '"displayName": $SERVICE_PRINCIPAL_NAME'; then
     echo "=== Service principal exists. ==="
-	echo
+  echo
 else
     echo "=== Service principal does not exist. Creating... ==="
-	az ad sp create-for-rbac --name "$SERVICE_PRINCIPAL_NAME" \
-		--role $SERVICE_PRINCIPAL_ROLE \
-		--scopes "/subscriptions/$SUBSCRIPTION_ID" > "$KEY_FILE"
-	echo
+  az ad sp create-for-rbac --name "$SERVICE_PRINCIPAL_NAME" \
+    --role $SERVICE_PRINCIPAL_ROLE \
+    --scopes "/subscriptions/$SUBSCRIPTION_ID" > "$KEY_FILE"
+  echo
 fi
 #########################################################################
 echo "=== Creating a resource group: $RESOURCE_GROUP ==="
 if az group show --name "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo "=== Resource group '$RESOURCE_GROUP' exists. ==="
-	echo
+  echo "=== Resource group '$RESOURCE_GROUP' exists. ==="
+  echo
 else
-	echo "=== Resource group '$RESOURCE_GROUP' does not exist. Creating... ==="
-	az group create --name $RESOURCE_GROUP --location $LOCATION
-	echo
+  echo "=== Resource group '$RESOURCE_GROUP' does not exist. Creating... ==="
+  az group create --name $RESOURCE_GROUP --location $LOCATION
+  echo
 fi
 #########################################################################
 echo "=== Creating Azure Key Vault ==="
 if az keyvault create --name "$KEY_VAULT_NAME" \
-		--resource-group "$RESOURCE_GROUP" \
-		--location "$LOCATION"; then
-	echo
+    --resource-group "$RESOURCE_GROUP" \
+    --location "$LOCATION"; then
+  echo
 else
-	echo
+    echo "=== Failed to create( The Azure Key Vault '$KEY_VAULT_NAME' already exists ==="
 fi
 #########################################################################
 echo "=== Assigmenting roles ==="
 KEY_VAULT_ROLES=(
-	"Key Vault Administrator"
+  "Key Vault Administrator"
 )
+
+ASSIGNEE_ID=$(az ad sp list --display-name $SERVICE_PRINCIPAL_NAME --query "[0].id" -o tsv)
 SCOPE=$(az keyvault show --name "$KEY_VAULT_NAME" --resource-group "$RESOURCE_GROUP" --query "id" -o tsv)
 for role in "${KEY_VAULT_ROLES[@]}"; do
-	echo "=== Assigmenting role: '$role'... ==="
-	az role assignment create \
-		--assignee "$ASSIGNEE_ID" \
-		--role "$role" \
-		--scope "$SCOPE" || echo "=== Failed to assignment: $role ==="
+  echo "=== Assigmenting role: '$role'... ==="
+  az role assignment create \
+    --assignee "$ASSIGNEE_ID" \
+    --role "$role" \
+    --scope "$SCOPE" || echo "=== Failed to assignment: $role ==="
 done
 echo
 #########################################################################
@@ -77,9 +79,9 @@ AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
 AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
 
 az login --service-principal \
-	--username "$AZURE_CLIENT_ID" \
-	--password "$AZURE_CLIENT_SECRET" \
-	--tenant "$AZURE_TENANT_ID"
+  --username "$AZURE_CLIENT_ID" \
+  --password "$AZURE_CLIENT_SECRET" \
+  --tenant "$AZURE_TENANT_ID"
 echo
 #########################################################################
 check_secret_exists() {
@@ -87,69 +89,69 @@ check_secret_exists() {
 }
 # Function to create a secret if it doesn't already exist
 createSecret() {
-	KEY_VAULT_NAME=$1
-	SECRET_NAME=$2
-	SECRET_VALUE=$3
+  KEY_VAULT_NAME=$1
+  SECRET_NAME=$2
+  SECRET_VALUE=$3
 
-	if check_secret_exists "$KEY_VAULT_NAME" "$SECRET_NAME"; then
-		echo "=== Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'. ==="
-		echo
-	else
-		echo "=== Creating secret '$SECRET_NAME'... ==="
-		if az keyvault secret set --vault-name "$KEY_VAULT_NAME" \
-				--name "$SECRET_NAME" \
-				--value "$SECRET_VALUE"; then
-			echo "=== Secret '$SECRET_NAME' created and value added. ==="
-			echo
-		else
-			echo " Failed to create secret '$SECRET_NAME'."
-			exit 1
-		fi
-	fi
+  if check_secret_exists "$KEY_VAULT_NAME" "$SECRET_NAME"; then
+    echo "=== Secret '$SECRET_NAME' already exists in Key Vault '$KEY_VAULT_NAME'. ==="
+    echo
+  else
+    echo "=== Creating secret '$SECRET_NAME'... ==="
+    if az keyvault secret set --vault-name "$KEY_VAULT_NAME" \
+        --name "$SECRET_NAME" \
+        --value "$SECRET_VALUE"; then
+      echo "=== Secret '$SECRET_NAME' created and value added. ==="
+      echo
+    else
+      echo " Failed to create secret '$SECRET_NAME'."
+      exit 1
+    fi
+  fi
 }
 createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_USERNAME" "$DB_USERNAME"
 createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_PASS" "$DB_PASS"
 #########################################################################
 if az storage account show --name "$STORAGE_ACCOUNT_NAME" \
-		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
+    --resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
     echo "=== Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists. ==="
-	echo
+  echo
 else
-	echo "=== Setting Up Azure Storage for Terraform State ==="
-	az storage account create --name "$STORAGE_ACCOUNT_NAME" \
-		--resource-group "$RESOURCE_GROUP" \
-		--location "$LOCATION" \
-		--sku "Standard_LRS"
-	echo
+  echo "=== Setting Up Azure Storage for Terraform State ==="
+  az storage account create --name "$STORAGE_ACCOUNT_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --location "$LOCATION" \
+    --sku "Standard_LRS"
+  echo
 fi
 #########################################################################
 if az storage container show \
-		--name "$CONTAINER_NAME" \
-		--account-name "$STORAGE_ACCOUNT_NAME" \
-		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-	echo "=== Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'. ==="
-	echo
+    --name "$CONTAINER_NAME" \
+    --account-name "$STORAGE_ACCOUNT_NAME" \
+    --resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
+  echo "=== Storage container '$CONTAINER_NAME' exists in account '$STORAGE_ACCOUNT_NAME'. ==="
+  echo
 else
-	echo "=== Creating the container $CONTAINER_NAME ==="
-	az storage container create --name "$CONTAINER_NAME" \
-		--account-name "$STORAGE_ACCOUNT_NAME"
-	echo
+  echo "=== Creating the container $CONTAINER_NAME ==="
+  az storage container create --name "$CONTAINER_NAME" \
+    --account-name "$STORAGE_ACCOUNT_NAME"
+  echo
 fi
 #########################################################################
 ACCOUNT_KEY=$(az storage account keys list \
-	--resource-group "$RESOURCE_GROUP" \
-	--account-name "$STORAGE_ACCOUNT_NAME" \
-	--query "[0].value" -o tsv)
+  --resource-group "$RESOURCE_GROUP" \
+  --account-name "$STORAGE_ACCOUNT_NAME" \
+  --query "[0].value" -o tsv)
 #########################################################################
 startTerraform() {
-	echo "🚀 STARTING TERRAFORM"
-	terraform init --reconfigure \
-		-backend-config="storage_account_name=$1" \
-		-backend-config="container_name=$2" \
-		-backend-config="key=terraform.tfstate" \
-		-backend-config="access_key=$3"
-  	
-   	terraform plan && terraform apply --auto-approve
+  echo "🚀 STARTING TERRAFORM"
+  terraform init --reconfigure \
+    -backend-config="storage_account_name=$1" \
+    -backend-config="container_name=$2" \
+    -backend-config="key=terraform.tfstate" \
+    -backend-config="access_key=$3"
+
+     terraform plan && terraform apply --auto-approve
 }
 startTerraform "$STORAGE_ACCOUNT_NAME" "$CONTAINER_NAME" "$ACCOUNT_KEY"
 #########################################################################

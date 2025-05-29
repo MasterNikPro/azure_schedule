@@ -1,3 +1,20 @@
+module "postgresql" {
+  source = "./modules/postgresql"
+
+  database_instances     = local.postgresql_instances
+  resource_group_name    = local.project.resource_group_name_azurerm
+
+  administrator_password =  data.azurerm_key_vault_secret.db_password.value
+  administrator_login    =  data.azurerm_key_vault_secret.db_username.value
+
+  project_tags = {
+    Environment = local.project.environment
+    ManagedBy   = "terraform"
+    Project     = local.project.name
+  }
+}
+
+
 module "vm" {
   source                      = "./modules/vm"
   ssh_keys                    = local.config.project.keys
@@ -11,7 +28,7 @@ module "vm" {
 }
 
 module "network" {
-  source              = "./modules/networks"
+  source              = "./modules/network"
   vnet_name           = local.vnet_name
   location            = local.location
   resource_group_name = local.resource_group_name
