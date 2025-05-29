@@ -3,17 +3,17 @@ output "postgresql_instances" {
   description = "Map of all PostgreSQL instances"
   value = {
     for k, v in azurerm_postgresql_flexible_server.this : k => {
-      server_id                     = v.id
-      server_name                   = v.name
-      server_fqdn                   = v.fqdn
-      server_location               = v.location
-      administrator_login           = v.administrator_login
-      postgresql_version            = v.version
-      sku_name                      = v.sku_name
-      storage_mb                    = v.storage_mb
-      backup_retention_days         = v.backup_retention_days
+      server_id     = v.id
+      server_name   = v.name
+      server_fqdn   = v.fqdn
+      server_location = v.location
+      administrator_login = v.administrator_login
+      postgresql_version = v.version
+      sku_name = v.sku_name
+      storage_mb = v.storage_mb
+      backup_retention_days = v.backup_retention_days
       public_network_access_enabled = v.public_network_access_enabled
-      zone                          = v.zone
+      zone = v.zone
     }
   }
 }
@@ -22,10 +22,10 @@ output "database_connection_strings" {
   description = "Database connection information for all instances"
   value = {
     for k, v in azurerm_postgresql_flexible_server.this : k => {
-      host              = v.fqdn
-      port              = local.postgresql_instances[k].port
-      database          = k
-      username          = v.administrator_login
+      host = v.fqdn
+      port = local.postgresql_instances[k].port
+      database = k
+      username = v.administrator_login
       connection_string = "postgresql://${v.administrator_login}:PASSWORD@${v.fqdn}:${local.postgresql_instances[k].port}/${k}"
     }
   }
@@ -81,4 +81,4 @@ output "backup_retention_days" {
 output "public_network_access_enabled" {
   description = "Whether public network access is enabled for the first instance"
   value       = length(azurerm_postgresql_flexible_server.this) > 0 ? values(azurerm_postgresql_flexible_server.this)[0].public_network_access_enabled : null
-}
+} 
