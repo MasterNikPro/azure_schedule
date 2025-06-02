@@ -22,3 +22,8 @@ output "config_summary" {
 output "vnet_id" {
   value = module.networks.vnet_id
 }
+
+### VM ###
+output "vm_name" {
+  value = module.vm.vm_name
+}
