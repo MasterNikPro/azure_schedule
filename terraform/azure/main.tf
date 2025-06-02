@@ -36,3 +36,10 @@ module "postgresql" {
     Project     = local.project.name
   }
 }
+
+module "load_balancer" {
+    source = "./modules/loadbalancer"
+    load_balancer  = local.load_balancer
+  project_values = local.project_values
+  
+}

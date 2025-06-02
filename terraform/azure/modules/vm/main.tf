@@ -1,9 +1,11 @@
 locals {
-  size_map = {
-    small  = "Standard_D2s_v3"
-    medium = "Standard_D4s_v3"
-    large  = "Standard_E2s_v3"
-  }
+
+	size_map = {
+		small  = "Standard_DC1ds_v3"
+		medium = "Standard_D4s_v3"
+		large  = "Standard_E2s_v3"
+	}
+
 
   os_image = {
     publisher = "Canonical"
