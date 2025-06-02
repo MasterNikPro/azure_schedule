@@ -8,6 +8,8 @@ module "vm" {
   location_azurerm            = local.config.project.location_azurerm
   azurerm_subnet              = module.network.subnet_ids[0]
   nsg_ids                     = module.network.nsg_ids
+
+  depends_on = [module.network]
 }
 
 module "network" {
@@ -35,4 +37,6 @@ module "postgresql" {
     ManagedBy   = "terraform"
     Project     = local.project.name
   }
+
+  depends_on = [module.network]
 }
