@@ -17,6 +17,9 @@ variable "database_instances" {
     geo_redundant_backup_enabled  = optional(bool, false)
     auto_grow_enabled             = optional(bool, false)
     public_network_access_enabled = optional(bool, true)
+    allow_public_access           = optional(bool, false)
+    start_ip_address              = optional(string, "0.0.0.0")
+    end_ip_address                = optional(string, "255.255.255.255")
   }))
   default = {}
 }

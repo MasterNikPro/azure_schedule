@@ -1,5 +1,5 @@
 locals {
-  config = jsondecode(file("${path.module}/../config.json"))
+  config = jsondecode(file("${path.module}/config.json"))
 
   db_instances = local.config.databases
 
@@ -28,6 +28,9 @@ locals {
       geo_redundant_backup_enabled  = lookup(db, "geo_redundant_backup_enabled", false)
       auto_grow_enabled             = lookup(db, "auto_grow_enabled", false)
       public_network_access_enabled = lookup(db, "public_network_access_enabled", true)
+      allow_public_access           = lookup(db, "allow_public_access", false)
+      start_ip_address              = lookup(db, "start_ip_address", "0.0.0.0")
+      end_ip_address                = lookup(db, "end_ip_address", "255.255.255.255")
     }
     if db.type == "postgres"
   }
