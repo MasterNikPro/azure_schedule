@@ -1,7 +1,3 @@
-output "ports" {
-  value = module.vm.ports
-}
-
 output "database_server_id" {
   description = "The ID of the first PostgreSQL Flexible Server"
   value       = module.postgresql.server_id
@@ -24,7 +20,12 @@ output "config_summary" {
 }
 
 output "vnet_id" {
-  value = module.network.vnet_id
+  value = module.networks.vnet_id
+}
+
+### VM ###
+output "vm_name" {
+  value = module.vm.vm_name
 }
 
 output "container_registry_ids" {

@@ -1,3 +1,12 @@
-output "ports" {
-  value = { for vm in var.vm_instances : vm.name => vm.port }
+output "vm_name" {
+	description = "Name of the vm"
+	value = {
+		for vm_name, vm_data in azurerm_linux_virtual_machine.main :
+		vm_name => {
+			name                    = vm_data.name
+			size                    = vm_data.size
+			os_disk                 = vm_data.os_disk
+			source_image_reference  = vm_data.source_image_reference
+		}
+	}
 }
