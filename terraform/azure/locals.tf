@@ -35,6 +35,22 @@ locals {
     if db.type == "postgres"
   }
 
+  container_registry_instances = {
+    for registry in local.config.artifact_registry : registry.name => {
+      name                          = "${registry.name}${local.project.environment}"
+      location                      = registry.region
+      sku                           = lookup(registry, "sku", "Standard")
+      admin_enabled                 = lookup(registry, "auth_required", true)
+      public_network_access_enabled = lookup(registry, "public_network_access_enabled", true)
+      tags = {
+        Environment    = local.project.environment
+        RepositoryType = registry.repository_type
+        Format         = registry.format
+      }
+    }
+    if registry.enabled == true && registry.provider == "azurerm"
+  }
+
   vnet_name           = "vnet-${local.config.project.environment}"
   location            = local.config.project.location_azurerm
   resource_group_name = local.config.project.resource_group_name_azurerm

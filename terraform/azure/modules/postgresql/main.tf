@@ -4,7 +4,7 @@ locals {
     for k, v in var.database_instances : k => v
     if v.type == "postgres"
   }
-  
+
   # Filter instances that allow public access
   postgresql_public_access = {
     for k, v in local.postgresql_instances : k => v

@@ -36,3 +36,16 @@ module "postgresql" {
     Project     = local.project.name
   }
 }
+
+module "container_registry" {
+  source = "./modules/container_registry"
+
+  registry_instances  = local.container_registry_instances
+  resource_group_name = local.project.resource_group_name_azurerm
+
+  project_tags = {
+    Environment = local.project.environment
+    ManagedBy   = "terraform"
+    Project     = local.project.name
+  }
+}
