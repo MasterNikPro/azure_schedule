@@ -1,32 +1,10 @@
-locals {
-
-	size_map = {
-		small  = "Standard_DC1ds_v3"
-		medium = "Standard_D4s_v3"
-		large  = "Standard_E2s_v3"
-	}
-
-
-  os_image = {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts-gen2"
-    version   = "latest"
-  }
-
-  os_disk = {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-}
-
 resource "azurerm_public_ip" "main" {
   for_each = { for vm in var.vm_instances : vm.name => vm if vm.public_ip }
 
   name                = "${each.value.name}-public-ip"
   location            = var.location_azurerm
   resource_group_name = var.resource_group_name_azurerm
-  allocation_method   = "Dynamic"
+  allocation_method   = each.value.allocation_method
 }
 
 resource "azurerm_network_interface" "main" {
@@ -37,9 +15,9 @@ resource "azurerm_network_interface" "main" {
   resource_group_name = var.resource_group_name_azurerm
 
   ip_configuration {
-    name                          = "internal"
+    name                          = each.value.ip_configuration_name
     subnet_id                     = var.azurerm_subnet
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = each.value.private_ip_address_allocation
     public_ip_address_id          = each.value.public_ip ? azurerm_public_ip.main[each.key].id : null
   }
 }
@@ -68,7 +46,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   location            = var.location_azurerm
   resource_group_name = var.resource_group_name_azurerm
 
-  size           = local.size_map.small
+  size           = lookup(var.vm_instances_size_map[var.location_azurerm], each.value.size, "Standard_DC1ds_v3")
   admin_username = var.hostname
 
   network_interface_ids = [
@@ -76,15 +54,15 @@ resource "azurerm_linux_virtual_machine" "main" {
   ]
 
   os_disk {
-    caching              = local.os_disk.caching
-    storage_account_type = local.os_disk.storage_account_type
+    caching              = lookup(var.os_disk[each.value.size], "caching", "ReadWrite")
+    storage_account_type = lookup(var.os_disk[each.value.size], "storage_account_type", "Standard_LRS")
   }
 
   source_image_reference {
-    publisher = local.os_image.publisher
-    offer     = local.os_image.offer
-    sku       = local.os_image.sku
-    version   = local.os_image.version
+    publisher = lookup(var.os_image[var.location_azurerm], "publisher", "Canonical")
+    offer     = lookup(var.os_image[var.location_azurerm], "offer", "0001-com-ubuntu-server-jammy")
+    sku       = lookup(var.os_image[var.location_azurerm], "sku", "22_04-lts-gen2")
+    version   = lookup(var.os_image[var.location_azurerm], "version", "latest")
   }
 
   admin_ssh_key {

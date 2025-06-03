@@ -29,8 +29,27 @@ locals {
       geo_redundant_backup_enabled  = lookup(db, "geo_redundant_backup_enabled", false)
       auto_grow_enabled             = lookup(db, "auto_grow_enabled", false)
       public_network_access_enabled = lookup(db, "public_network_access_enabled", true)
+      allow_public_access           = lookup(db, "allow_public_access", false)
+      start_ip_address              = lookup(db, "start_ip_address", "0.0.0.0")
+      end_ip_address                = lookup(db, "end_ip_address", "255.255.255.255")
     }
     if db.type == "postgres"
+  }
+
+  container_registry_instances = {
+    for registry in local.config.artifact_registry : registry.name => {
+      name                          = "${registry.name}${local.project.environment}"
+      location                      = registry.region
+      sku                           = lookup(registry, "sku", "Standard")
+      admin_enabled                 = lookup(registry, "auth_required", true)
+      public_network_access_enabled = lookup(registry, "public_network_access_enabled", true)
+      tags = {
+        Environment    = local.project.environment
+        RepositoryType = registry.repository_type
+        Format         = registry.format
+      }
+    }
+    if registry.enabled == true && registry.provider == "azurerm"
   }
 
   vnet_name           = "vnet-${local.config.project.environment}"
