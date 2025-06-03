@@ -1,4 +1,5 @@
 locals {
+
   config = jsondecode(file("${path.module}/config.json"))
 
   db_instances = local.config.databases
@@ -88,5 +89,11 @@ locals {
     "db-sg"            = "10.0.3.4"
     "reverse-proxy-sg" = "10.0.1.4"
     "bastion-sg"       = "10.0.1.5"
+  }
+  load_balancer   = local.config.load_balancer
+
+  project_values = {
+    location            = lookup(local.config.project, "location_azurerm", "northeurope")
+    resource_group_name = lookup(local.config.project, "resource_group_name_azurerm", "resource-group")
   }
 }
