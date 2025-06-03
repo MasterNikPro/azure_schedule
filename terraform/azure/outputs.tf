@@ -26,3 +26,14 @@ output "config_summary" {
 output "vnet_id" {
   value = module.network.vnet_id
 }
+
+output "container_registry_ids" {
+  description = "IDs of the created container registries"
+  value       = module.container_registry.registry_ids
+}
+
+
+output "container_registry_names" {
+  description = "Names of the created container registries"
+  value       = module.container_registry.registry_names
+}

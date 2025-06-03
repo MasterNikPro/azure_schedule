@@ -43,3 +43,5 @@ keys.json
 
 # Ignore dump files
 *.dump
+
+.env
