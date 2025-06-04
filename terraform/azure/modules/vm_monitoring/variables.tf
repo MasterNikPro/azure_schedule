@@ -33,3 +33,11 @@ variable "azurerm_monitor_action_group" {
 		}))
 	}))
 }
+
+variable "azurerm_log_analytics_workspace" {
+	type = list(object({
+		name = string
+		sku = string
+		retention_in_days = number
+	}))
+}

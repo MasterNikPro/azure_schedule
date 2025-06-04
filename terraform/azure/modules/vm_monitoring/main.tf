@@ -8,11 +8,13 @@ resource "azurerm_storage_account" "main" {
 }
 
 resource "azurerm_log_analytics_workspace" "main" {
-  name                = "example-law"
+  for_each = { for analytic in var.azurerm_log_analytics_workspace : analytic.name => analytic }
+
+  name                = each.key
   resource_group_name = var.resource_group_name_azurerm
   location            = var.location_azurerm
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
+  sku                 = each.value.sku
+  retention_in_days   = each.value.retention_in_days
 }
 
 resource "azurerm_monitor_diagnostic_setting" "example" {
@@ -20,7 +22,7 @@ resource "azurerm_monitor_diagnostic_setting" "example" {
 
   name                       = "${each.key}-diagnostic-setting"
   target_resource_id         = each.value
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main[each.value]
 
   metric {
     category = "AllMetrics"
