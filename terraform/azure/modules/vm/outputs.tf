@@ -10,3 +10,7 @@ output "vm_name" {
 		}
 	}
 }
+
+output "vm_ids" {
+	value = { for vm_key, vm in azurerm_linux_virtual_machine.main : vm_key => vm.id }
+}
