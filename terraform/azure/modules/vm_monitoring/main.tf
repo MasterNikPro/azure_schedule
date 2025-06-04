@@ -1,17 +1,18 @@
-resource "azurerm_log_analytics_workspace" "main" {
-  name                = "example-law"
-  resource_group_name = var.resource_group_name_azurerm
-  location            = var.location_azurerm
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
-}
-
+# Bootstrap script
 resource "azurerm_storage_account" "main" {
   name                     = var.diagnostic_storage_account_name
   resource_group_name      = var.resource_group_name_azurerm
   location                 = var.location_azurerm
   account_tier             = "Standard"
   account_replication_type = "LRS"
+}
+
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "example-law"
+  resource_group_name = var.resource_group_name_azurerm
+  location            = var.location_azurerm
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
 }
 
 resource "azurerm_monitor_diagnostic_setting" "example" {
@@ -31,7 +32,7 @@ resource "azurerm_monitor_diagnostic_setting" "example" {
 resource "azurerm_monitor_metric_alert" "high_cpu_alert" {
   for_each            = var.vm_ids
 
-  name                = "${each.key}-high-cpu-alert"
+  name                = "${each.key}-"
   resource_group_name = var.resource_group_name_azurerm
   scopes              = [each.value]
   description         = "Alert when CPU usage is high"
@@ -47,7 +48,7 @@ resource "azurerm_monitor_metric_alert" "high_cpu_alert" {
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.main.id
+    action_group_id = azurerm_monitor_action_group.main[each.value]
   }
 }
 
@@ -55,7 +56,7 @@ resource "azurerm_monitor_metric_alert" "high_cpu_alert" {
 resource "azurerm_monitor_metric_alert" "memory_alert" {
   for_each            = var.vm_ids
 
-  name                = "${each.key}-memory_alert"
+  name                = "-memory-alert"
   resource_group_name = var.resource_group_name_azurerm
   scopes              = [each.value]
   description         = "Alert for average available memory bytes"
@@ -71,18 +72,24 @@ resource "azurerm_monitor_metric_alert" "memory_alert" {
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.main.id
+    action_group_id = azurerm_monitor_action_group.main[each.value]
   }
 }
 
 resource "azurerm_monitor_action_group" "main" {
-  name                = "email-action-group"
-  resource_group_name = var.resource_group_name_azurerm
-  short_name          = "actiongrp"
+  for_each = { for action in var.azurerm_monitor_action_group : action.name => action }
 
-  email_receiver {
-    name          = "DolVladzio"
-    email_address = "dolynkavladzio@gmail.com"
-    use_common_alert_schema = true
+  name                = each.key
+  resource_group_name = var.resource_group_name_azurerm
+  short_name          = each.value.short_name
+
+  dynamic "email_receiver" {
+    for_each = each.value.email_receiver
+
+    content {
+      name                    = email_receiver.value.name
+      email_address           = email_receiver.value.email_address
+      use_common_alert_schema = email_receiver.value.use_common_alert_schema
+    }
   }
 }
