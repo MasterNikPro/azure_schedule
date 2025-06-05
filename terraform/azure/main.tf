@@ -29,6 +29,22 @@ module "networks" {
   nsgs                = local.nsg_list
 }
 
+module "postgresql" {
+  source = "./modules/postgresql"
+
+  database_instances     = local.postgresql_instances
+  resource_group_name    = local.project.resource_group_name_azurerm
+  administrator_password = data.azurerm_key_vault_secret.db_password.value
+  administrator_login    = data.azurerm_key_vault_secret.db_username.value
+  project_tags = {
+    Environment = local.project.environment
+    ManagedBy   = "terraform"
+    Project     = local.project.name
+  }
+
+  depends_on = [module.networks]
+}
+
 module "container_registry" {
   source = "./modules/container_registry"
 
@@ -58,8 +74,8 @@ module "vm_monitoring" {
   resource_group_name_azurerm     = local.config.project.resource_group_name_azurerm
   location_azurerm                = local.config.project.location_azurerm
   diagnostic_storage_account_name = local.config.project.diagnostic_storage_account_name
-  log_analytics_workspace         = local.config.log_analytics_workspace
+  log_analytics_workspace         = local.config.azurerm_log_analytics_workspace
   vm_ids                          = module.vm.vm_ids
   monitor_metric_alert            = local.config.monitor_metric_alert
-  azurerm_monitor_action_group    = local.config.azurerm_monitor_action_group
+  monitor_action_group            = local.config.azurerm_monitor_action_group
 }
