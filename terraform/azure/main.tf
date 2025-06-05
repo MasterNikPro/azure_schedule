@@ -1,5 +1,5 @@
 module "vm" {
-  source                      = "./modules/vm"
+  source = "./modules/vm"
 
   ssh_keys                    = local.config.project.keys
   vm_instances                = local.config.vm_instances
@@ -14,11 +14,11 @@ module "vm" {
   os_image                    = local.config.os_image
   storage_account_uri         = module.vm_monitoring.storage_account_uri
 
-  depends_on = [ module.networks ]
+  depends_on = [module.networks]
 }
 
 module "networks" {
-  source              = "./modules/networks"
+  source = "./modules/networks"
 
   vnet_name           = local.vnet_name
   location            = local.location
@@ -41,15 +41,15 @@ module "container_registry" {
     Project     = local.project.name
   }
 
-  depends_on = [ module.networks ]
+  depends_on = [module.networks]
 }
 
 module "load_balancer" {
-  source = "./modules/loadbalancer"
+  source         = "./modules/loadbalancer"
   load_balancer  = local.load_balancer
   project_values = local.project_values
 
-  depends_on = [ module.networks ]
+  depends_on = [module.networks]
 }
 
 module "vm_monitoring" {
@@ -58,8 +58,8 @@ module "vm_monitoring" {
   resource_group_name_azurerm     = local.config.project.resource_group_name_azurerm
   location_azurerm                = local.config.project.location_azurerm
   diagnostic_storage_account_name = local.config.project.diagnostic_storage_account_name
+  log_analytics_workspace         = local.config.log_analytics_workspace
   vm_ids                          = module.vm.vm_ids
-  azurerm_log_analytics_workspace = local.config.azurerm_log_analytics_workspace
-  # azurerm_monitor_metric_alert    = local.config.azurerm_monitor_metric_alert
+  monitor_metric_alert            = local.config.monitor_metric_alert
   azurerm_monitor_action_group    = local.config.azurerm_monitor_action_group
 }
