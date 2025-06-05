@@ -1,4 +1,3 @@
-# Bootstrap script
 resource "azurerm_storage_account" "main" {
   name                     = var.diagnostic_storage_account_name
   resource_group_name      = var.resource_group_name_azurerm
@@ -8,7 +7,7 @@ resource "azurerm_storage_account" "main" {
 }
 
 resource "azurerm_log_analytics_workspace" "main" {
-  for_each = { for analytic in var.azurerm_log_analytics_workspace : analytic.name => analytic }
+  for_each = { for analytic in var.log_analytics_workspace : analytic.name => analytic }
 
   name                = each.key
   resource_group_name = var.resource_group_name_azurerm
@@ -22,7 +21,7 @@ resource "azurerm_monitor_diagnostic_setting" "example" {
 
   name                       = "${each.key}-diagnostic-setting"
   target_resource_id         = each.value
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main[each.value]
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.main["example-law"].id
 
   metric {
     category = "AllMetrics"
@@ -30,54 +29,35 @@ resource "azurerm_monitor_diagnostic_setting" "example" {
   }
 }
 
-# Create Alert Rules (High CPU Usage)
-resource "azurerm_monitor_metric_alert" "high_cpu_alert" {
-  for_each            = var.vm_ids
+resource "azurerm_monitor_metric_alert" "main" {
+  for_each = { for i in var.monitor_metric_alert : i.name => i }
 
-  name                = "${each.key}-"
+  name                = each.key
+  description         = each.value.description
   resource_group_name = var.resource_group_name_azurerm
-  scopes              = [each.value]
-  description         = "Alert when CPU usage is high"
-  severity            = 2
-  window_size          = "PT5M"
+  scopes              = [for key in each.value.scopes : var.vm_ids[key]]
+  severity            = lookup(each.value, "severity", 1)
 
-  criteria {
-    metric_namespace = "Microsoft.Compute/virtualMachines"
-    metric_name      = "Percentage CPU"
-    aggregation      = "Average"
-    operator         = "GreaterThan"
-    threshold        = 80
+  target_resource_type     = each.value.target_resource_type
+  target_resource_location = var.location_azurerm
+
+  dynamic "criteria" {
+    for_each = each.value.criteria
+    content {
+      metric_namespace = criteria.value.metric_namespace
+      metric_name      = criteria.value.metric_name
+      aggregation      = criteria.value.aggregation
+      operator         = criteria.value.operator
+      threshold        = criteria.value.threshold
+    }
   }
 
-  action {
-    action_group_id = azurerm_monitor_action_group.main[each.value]
-  }
+  # action {
+  #   action_group_id = 
+  # }
 }
 
-# Create Alert Rules (Memory Alert)
-resource "azurerm_monitor_metric_alert" "memory_alert" {
-  for_each            = var.vm_ids
-
-  name                = "-memory-alert"
-  resource_group_name = var.resource_group_name_azurerm
-  scopes              = [each.value]
-  description         = "Alert for average available memory bytes"
-  severity            = 2
-  window_size          = "PT5M"
-
-  criteria {
-    metric_namespace = "Microsoft.Compute/virtualMachines"
-    metric_name      = "Available Memory Bytes"
-    aggregation      = "Average"
-    operator         = "LessThan"
-    threshold        = 200000000 
-  }
-
-  action {
-    action_group_id = azurerm_monitor_action_group.main[each.value]
-  }
-}
-
+# Done
 resource "azurerm_monitor_action_group" "main" {
   for_each = { for action in var.azurerm_monitor_action_group : action.name => action }
 
