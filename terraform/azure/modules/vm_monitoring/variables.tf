@@ -23,6 +23,7 @@ variable "monitor_metric_alert" {
       operator         = string
       threshold        = number
     }))
+    action_group = list(string)
   }))
 }
 
@@ -35,7 +36,7 @@ variable "log_analytics_workspace" {
   }))
 }
 
-variable "azurerm_monitor_action_group" {
+variable "monitor_action_group" {
   type = list(object({
     name       = string
     short_name = string

@@ -52,14 +52,17 @@ resource "azurerm_monitor_metric_alert" "main" {
     }
   }
 
-  # action {
-  #   action_group_id = 
-  # }
+  dynamic "action" {
+    for_each = [for name in each.value.action_group : azurerm_monitor_action_group.main[name].id]
+
+    content {
+      action_group_id = action.value
+    }
+  }
 }
 
-# Done
 resource "azurerm_monitor_action_group" "main" {
-  for_each = { for action in var.azurerm_monitor_action_group : action.name => action }
+  for_each = { for action in var.monitor_action_group : action.name => action }
 
   name                = each.key
   resource_group_name = var.resource_group_name_azurerm
