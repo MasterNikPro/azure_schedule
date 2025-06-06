@@ -24,6 +24,7 @@ resource "azurerm_postgresql_flexible_server" "this" {
   administrator_password = var.administrator_password
 
   sku_name = each.value.sku_name
+  zone     = each.value.azure_zone != null ? tostring(each.value.azure_zone) : null
 
   storage_mb                   = each.value.storage_mb
   backup_retention_days        = each.value.backup_retention_days

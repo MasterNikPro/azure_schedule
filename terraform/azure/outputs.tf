@@ -35,6 +35,17 @@ output "nsg_ids" {
 output "vm_name" {
   value = module.vm.vm_name
 }
+
+output "vm_details" {
+  description = "Detailed VM information including IPs"
+  value = module.vm.vm_details
+}
+
+output "kubernetes_workers" {
+  description = "List of VMs ready for Kubernetes deployment"
+  value = module.vm.kubernetes_workers
+}
+
 ### Container_Registry #############################
 output "container_registry_ids" {
   description = "IDs of the created container registries"

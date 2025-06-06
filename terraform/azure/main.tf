@@ -59,5 +59,15 @@ module "load_balancer" {
     source = "./modules/loadbalancer"
     load_balancer  = local.load_balancer
   project_values = local.project_values
+
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/inventory.tpl", {
+    kubernetes_workers = module.vm.kubernetes_workers
+    acr_name          = module.container_registry.registry_names
+  })
+  filename = "${path.module}/../../ansible/inventory.ini"
   
+  depends_on = [module.vm, module.container_registry]
 }
