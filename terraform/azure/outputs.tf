@@ -36,10 +36,6 @@ output "vm_name" {
   value = module.vm.vm_name
 }
 
-output "vm_details" {
-  description = "Detailed VM information including IPs"
-  value = module.vm.vm_details
-}
 
 output "kubernetes_workers" {
   description = "List of VMs ready for Kubernetes deployment"

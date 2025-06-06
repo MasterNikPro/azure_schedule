@@ -11,19 +11,6 @@ output "vm_name" {
 	}
 }
 
-output "vm_details" {
-	description = "Detailed information about VMs including IPs"
-	value = {
-		for vm_name, vm_data in azurerm_linux_virtual_machine.main :
-		vm_name => {
-			name        = vm_data.name
-			private_ip  = azurerm_network_interface.main[vm_name].ip_configuration[0].private_ip_address
-			public_ip   = contains(keys(azurerm_public_ip.main), vm_name) ? azurerm_public_ip.main[vm_name].ip_address : null
-			vm_size     = vm_data.size
-		}
-	}
-}
-
 output "kubernetes_workers" {
 	description = "List of all VMs formatted for Kubernetes deployment"
 	value = [
