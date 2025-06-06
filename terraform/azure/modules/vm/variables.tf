@@ -53,3 +53,5 @@ variable "os_image" {
     version   = string
   }))
 }
+
+variable "storage_account_uri" {}

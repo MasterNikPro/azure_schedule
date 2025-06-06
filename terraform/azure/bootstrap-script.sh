@@ -71,17 +71,6 @@ for role in "${KEY_VAULT_ROLES[@]}"; do
 done
 echo
 #########################################################################
-echo "=== Logging... ===" 
-AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
-AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
-AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
-
-az login --service-principal \
-	--username "$AZURE_CLIENT_ID" \
-	--password "$AZURE_CLIENT_SECRET" \
-	--tenant "$AZURE_TENANT_ID"
-echo
-#########################################################################
 check_secret_exists() {
     az keyvault secret show --vault-name "$1" --name "$2"
 }
@@ -110,18 +99,24 @@ createSecret() {
 createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_USERNAME" "$DB_USERNAME"
 createSecret "$KEY_VAULT_NAME" "$SECRET_NAME_DB_PASS" "$DB_PASS"
 #########################################################################
-if az storage account show --name "$STORAGE_ACCOUNT_NAME" \
-		--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
-    echo "=== Azure Storage account '$STORAGE_ACCOUNT_NAME' already exists. ==="
-	echo
-else
-	echo "=== Setting Up Azure Storage for Terraform State ==="
-	az storage account create --name "$STORAGE_ACCOUNT_NAME" \
-		--resource-group "$RESOURCE_GROUP" \
-		--location "$LOCATION" \
-		--sku "Standard_LRS"
-	echo
-fi
+echo "=== Setting Up Azure Storage Account(-s) ==="
+STORAGE_ACCOUNT_NAMES=(
+	"$STORAGE_ACCOUNT_NAME"
+)
+for account in "${STORAGE_ACCOUNT_NAMES[@]}"; do
+	if az storage account show --name "$account" \
+			--resource-group "$RESOURCE_GROUP" > /dev/null 2>&1; then
+		echo "=== Azure Storage account '$account' already exists. ==="
+		echo
+	else
+		az storage account create --name "$account" \
+			--resource-group "$RESOURCE_GROUP" \
+			--location "$LOCATION" \
+			--sku "Standard_LRS"
+		echo
+	fi
+done
+echo
 #########################################################################
 if az storage container show \
 		--name "$CONTAINER_NAME" \
@@ -141,6 +136,20 @@ ACCOUNT_KEY=$(az storage account keys list \
 	--account-name "$STORAGE_ACCOUNT_NAME" \
 	--query "[0].value" -o tsv)
 #########################################################################
+azureLoggin() {
+	echo "=== Logging... ===" 
+	AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
+	AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
+	AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
+
+	az login --service-principal \
+		--username "$AZURE_CLIENT_ID" \
+		--password "$AZURE_CLIENT_SECRET" \
+		--tenant "$AZURE_TENANT_ID"
+	echo
+}
+azureLoggin
+#########################################################################
 startTerraform() {
 	echo "🚀 STARTING TERRAFORM"
 	terraform init --reconfigure \
@@ -148,8 +157,8 @@ startTerraform() {
 		-backend-config="container_name=$2" \
 		-backend-config="key=terraform.tfstate" \
 		-backend-config="access_key=$3"
-  	
-   	terraform plan && terraform apply --auto-approve
+
+	terraform plan && terraform apply --auto-approve
 }
 startTerraform "$STORAGE_ACCOUNT_NAME" "$CONTAINER_NAME" "$ACCOUNT_KEY"
 #########################################################################
