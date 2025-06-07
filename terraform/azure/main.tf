@@ -64,7 +64,6 @@ module "load_balancer" {
   source         = "./modules/loadbalancer"
   load_balancer  = local.load_balancer
   project_values = local.project_values
-
   depends_on = [module.networks]
 }
 
@@ -78,4 +77,14 @@ module "vm_monitoring" {
   vm_ids                          = module.vm.vm_ids
   monitor_metric_alert            = local.config.monitor_metric_alert
   monitor_action_group            = local.config.azurerm_monitor_action_group
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/inventory.tpl", {
+    kubernetes_workers = module.vm.kubernetes_workers
+    acr_name          = module.container_registry.registry_names
+  })
+  filename = "${path.module}/../../ansible/inventory.ini"
+  
+  depends_on = [module.vm, module.container_registry]
 }
