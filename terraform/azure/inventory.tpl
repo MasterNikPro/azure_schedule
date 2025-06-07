@@ -12,7 +12,7 @@ acr_server=${values(acr_name)[0]}.azurecr.io
 
 [kubernetes_workers]
 %{ for idx, worker in kubernetes_workers ~}
-${worker.name} ansible_host=${worker.public_ip} private_ip=${worker.private_ip} vm_size=${worker.vm_size} node_role=worker
+${worker.name} ansible_host=${worker.public_ip} private_ip=${worker.private_ip}
 %{ endfor ~}
 
 
