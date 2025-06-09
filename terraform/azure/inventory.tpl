@@ -12,28 +12,12 @@ acr_server=${values(acr_name)[0]}.azurecr.io
 
 [kubernetes_workers]
 %{ for idx, worker in kubernetes_workers ~}
-${worker.name} ansible_host=${worker.public_ip} private_ip=${worker.private_ip}
+${worker.name} ansible_host=${worker.public_ip}\
+%{ if worker.name != "k3s-master-1" ~} ansible_ssh_common_args='-o ProxyJump=ubuntu@${kubernetes_workers[0].public_ip}'%{ endif ~}
 %{ endfor ~}
-
 
 [kubernetes_nodes:children]
 kubernetes_workers
-
-# Role-based grouping for your planned Ansible roles
-[kubernetes_install]
-%{ for idx, worker in kubernetes_workers ~}
-${worker.name}
-%{ endfor ~}
-
-[kubernetes_backend]
-%{ for idx, worker in kubernetes_workers ~}
-${worker.name}
-%{ endfor ~}
-
-[kubernetes_frontend]
-%{ for idx, worker in kubernetes_workers ~}
-${worker.name}
-%{ endfor ~}
 
 # Group variables for roles
 [kubernetes_install:vars]
