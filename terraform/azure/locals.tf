@@ -17,6 +17,7 @@ locals {
       security_groups = db.security_groups
       network         = db.network
       location        = local.project.location_azurerm
+      azure_zone      = lookup(db, "azure_zone", null) != null ? tostring(lookup(db, "azure_zone", null)) : null
 
       sku_name = db.sku_name
 

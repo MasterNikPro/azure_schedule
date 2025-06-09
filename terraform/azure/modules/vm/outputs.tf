@@ -14,3 +14,15 @@ output "vm_name" {
 output "vm_ids" {
   value = { for vm_key, vm in azurerm_linux_virtual_machine.main : vm_key => vm.id }
 }
+
+output "kubernetes_workers" {
+	description = "List of all VMs formatted for Kubernetes deployment"
+	value = [
+		for vm_name, vm_data in azurerm_linux_virtual_machine.main : {
+			name       = vm_data.name
+			public_ip  = contains(keys(azurerm_public_ip.main), vm_name) ? azurerm_public_ip.main[vm_name].ip_address : azurerm_network_interface.main[vm_name].ip_configuration[0].private_ip_address
+			private_ip = azurerm_network_interface.main[vm_name].ip_configuration[0].private_ip_address
+			vm_size    = vm_data.size
+		}
+	]
+}
