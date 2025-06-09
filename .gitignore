@@ -21,7 +21,7 @@ override.tf.json
 # Ignore test.tf and inventory
 test.tf
 ansible/inventory/
-ansible.cfg
+
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
