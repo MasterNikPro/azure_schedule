@@ -84,7 +84,7 @@ resource "local_file" "ansible_inventory" {
     kubernetes_workers = module.vm.kubernetes_workers
     acr_name          = module.container_registry.registry_names
   })
-  filename = "${path.module}/../../ansible/inventory.ini"
+  filename = "${path.module}/../../ansible/inventory/inventory.ini"
   
   depends_on = [module.vm, module.container_registry]
 }
