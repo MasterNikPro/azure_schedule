@@ -73,10 +73,10 @@ module "vm_monitoring" {
   resource_group_name_azurerm     = local.config.project.resource_group_name_azurerm
   location_azurerm                = local.config.project.location_azurerm
   diagnostic_storage_account_name = local.config.project.diagnostic_storage_account_name
-  log_analytics_workspace         = local.config.azurerm_log_analytics_workspace
+  log_analytics_workspace         = local.config.log_analytics_workspace
   vm_ids                          = module.vm.vm_ids
   monitor_metric_alert            = local.config.monitor_metric_alert
-  monitor_action_group            = local.config.azurerm_monitor_action_group
+  monitor_action_group            = local.config.monitor_action_group
 }
 
 resource "local_file" "ansible_inventory" {
