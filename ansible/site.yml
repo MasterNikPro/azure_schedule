@@ -1,5 +1,5 @@
 - name: Install k3s
-  hosts: dolvladzio
+  hosts: kubernetes_workers
   become: yes
   roles: 
     - install_k3s
