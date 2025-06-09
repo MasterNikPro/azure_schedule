@@ -1,5 +1,7 @@
 - name: Install k3s
   hosts: kubernetes_workers
   become: yes
+  vars:
+    master_node: k3s-master-1
   roles: 
     - install_k3s
