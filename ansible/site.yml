@@ -1,0 +1,5 @@
+- name: Install k3s
+  hosts: dolvladzio
+  become: yes
+  roles: 
+    - install_k3s

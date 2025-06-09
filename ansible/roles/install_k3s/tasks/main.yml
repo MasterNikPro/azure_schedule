@@ -1,0 +1,18 @@
+- name: Install k3s server on the first node
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init" sh -
+  when: inventory_hostname == "node1"
+
+- name: Install k3s server and join the cluster on other nodes
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --server https://{{ hostvars['node1']['ansible_host'] }}:6443" K3S_TOKEN=$(cat /var/lib/rancher/k3s/server/node-token) sh -
+  when: inventory_hostname != "node1"
+
+- name: Verify k3s installation
+  command: kubectl get nodes
+  register: k3s_output
+  changed_when: false
+
+- name: Show k3s nodes
+  debug:
+    msg: "{{ k3s_output.stdout }}"
