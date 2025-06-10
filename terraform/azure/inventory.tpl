@@ -12,5 +12,8 @@ acr_server=${values(acr_name)[0]}.azurecr.io
 
 [kubernetes_workers]
 %{ for idx, worker in kubernetes_workers ~}
-${worker.name} public_ip=${worker.public_ip} private_ip=${worker.private_ip}
+${worker.name} ansible_host=${worker.public_ip != "" ? worker.public_ip : worker.private_ip} 
+%{ if worker.name != "k3s-master-1" ~} 
+ansible_ssh_common_args='-o ProxyJump=ubuntu@${kubernetes_workers[0].public_ip}'
+%{ endif ~}
 %{ endfor ~}
