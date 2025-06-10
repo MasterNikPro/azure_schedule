@@ -64,7 +64,7 @@ module "load_balancer" {
   source         = "./modules/loadbalancer"
   load_balancer  = local.load_balancer
   project_values = local.project_values
-  depends_on = [module.networks]
+  depends_on     = [module.networks]
 }
 
 module "vm_monitoring" {
@@ -82,9 +82,9 @@ module "vm_monitoring" {
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tpl", {
     kubernetes_workers = module.vm.kubernetes_workers
-    acr_name          = module.container_registry.registry_names
+    acr_name           = module.container_registry.registry_names
   })
-  filename = "${path.module}/../../ansible/inventory.ini"
-  
+  filename = "${path.module}/../../ansible/inventory/inventory.ini"
+
   depends_on = [module.vm, module.container_registry]
 }
