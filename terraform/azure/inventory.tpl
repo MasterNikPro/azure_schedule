@@ -12,22 +12,5 @@ acr_server=${values(acr_name)[0]}.azurecr.io
 
 [kubernetes_workers]
 %{ for idx, worker in kubernetes_workers ~}
-${worker.name} ansible_host=${worker.public_ip}\
-%{ if worker.name != "k3s-master-1" ~} ansible_ssh_common_args='-o ProxyJump=ubuntu@${kubernetes_workers[0].public_ip}'%{ endif ~}
+${worker.name} public_ip=${worker.public_ip} private_ip=${worker.private_ip}
 %{ endfor ~}
-
-[kubernetes_nodes:children]
-kubernetes_workers
-
-# Group variables for roles
-[kubernetes_install:vars]
-k8s_version=1.28.0
-container_runtime=containerd
-
-[kubernetes_backend:vars]
-app_type=backend
-acr_name=backend
-
-[kubernetes_frontend:vars]
-app_type=frontend
-acr_name=frontend
