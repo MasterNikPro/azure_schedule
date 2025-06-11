@@ -6,7 +6,7 @@
   roles: 
     - install_k3s
 
-- name: K3s - frontend
+- name: K3s - app deploy
   hosts: kubernetes_workers
   become: yes
   roles: 
