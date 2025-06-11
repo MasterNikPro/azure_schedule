@@ -22,6 +22,22 @@
   loop: "{{ namespaces }}"
   tags: namespaces
 
+- name: Deploy ConfigMap
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/templates/configmap.yml.j2"
+  loop: "{{ configmaps }}"
+  tags:
+    - configmap
+
+- name: Deploy Secret
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/templates/secrets.yml.j2"
+  loop: "{{ secrets }}"
+  tags:
+    - secret
+
 - name: Deploy Service
   kubernetes.core.k8s:
     state: present

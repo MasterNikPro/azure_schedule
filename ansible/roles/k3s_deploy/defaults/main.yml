@@ -23,31 +23,31 @@ secrets: [
     "name": "backend-secret",
     "data": {
       "DB_USER": "schedule_user",
-      "DB_USER": "MyPassword1234!"
+      "DB_PASSWORD": "MyPassword1234!"
     },
     "namespace": "lab"
   }
 ]
 services: [
-  # {
-  #   "name": "redis-svc",
-  #   "app": "redis",
-  #   "type": "ClusterIP",
-  #   "port": 6379,
-  #   "target_port": 6379,
-  #   "protocol": "TCP",
-  #   "namespace": "lab"
-  # },
-  # {
-  #   "name": "backend-svc",
-  #   "app": "backend",
-  #   "type": "NodePort",
-  #   "port": 8080,
-  #   "target_port": 8080,
-  #   "protocol": "TCP",
-  #   "node_port": 30088,
-  #   "namespace": "lab"
-  # },
+  {
+    "name": "redis-svc",
+    "app": "redis",
+    "type": "ClusterIP",
+    "port": 6379,
+    "target_port": 6379,
+    "protocol": "TCP",
+    "namespace": "lab"
+  },
+  {
+    "name": "backend-svc",
+    "app": "backend",
+    "type": "NodePort",
+    "port": 8080,
+    "target_port": 8080,
+    "protocol": "TCP",
+    "node_port": 30088,
+    "namespace": "lab"
+  },
   {
     "name": "frontend-svc",
     "app": "frontend",
@@ -60,28 +60,28 @@ services: [
   }
 ]
 deployments:  [
-  # {
-  #   "name": "redis",
-  #   "app": "redis",
-  #   "registry": "dockerhub",
-  #   "image": "redis:7-alpine",
-  #   "replicas": 1,
-  #   "port": 6379,
-  #   "config_refs": [],
-  #   "secret_refs": [],
-  #   "namespace": "lab"
-  # },
-  # {
-  #   "name": "backend",
-  #   "app": "backend",
-  #   "registry": "dockerhub",
-  #   "image": "dolvladzio/backend",
-  #   "replicas": 1,
-  #   "port": 8080,
-  #   "config_refs": ["backend-config"],
-  #   "secret_refs": ["backend-secret"],
-  #   "namespace": "lab"
-  # },
+  {
+    "name": "redis",
+    "app": "redis",
+    "registry": "dockerhub",
+    "image": "redis:7-alpine",
+    "replicas": 1,
+    "port": 6379,
+    "config_refs": [],
+    "secret_refs": [],
+    "namespace": "lab"
+  },
+  {
+    "name": "backend",
+    "app": "backend",
+    "registry": "dockerhub",
+    "image": "dolvladzio/backend",
+    "replicas": 1,
+    "port": 8080,
+    "config_refs": ["backend-config"],
+    "secret_refs": ["backend-secret"],
+    "namespace": "lab"
+  },
   {
     "name": "frontend",
     "app": "frontend",
