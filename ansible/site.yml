@@ -7,9 +7,7 @@
     - install_k3s
 
 - name: K3s - frontend
-  hosts: k3s-master-1
+  hosts: kubernetes_workers
   become: yes
-  vars:
-    master_node: k3s-master-1
   roles: 
-    - k3s_frontend
+    - k3s_deploy
