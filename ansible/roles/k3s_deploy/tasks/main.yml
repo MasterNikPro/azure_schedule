@@ -1,7 +1,31 @@
+- name: install pip3
+  apt: 
+    update_cache: yes
+    pkg: 
+      - python3-pip 
+
+    state: present
+
+- name: install pre-requisites
+  pip:
+    name:
+      - openshift
+      - pyyaml
+      - kubernetes 
+
+- name: Create a k8s namespace
+  kubernetes.core.k8s:
+    name: "{{ item.name }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  loop: "{{ namespaces }}"
+  tags: namespaces
+
 - name: Deploy Service
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/service.yaml.j2"
+    template: "{{ role_path }}/templates/service.yml.j2"
   loop: "{{ services }}"
   tags:
     - service
@@ -9,7 +33,7 @@
 - name: Deploy Deployment
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/deployment.yaml.j2"
+    template: "{{ role_path }}/templates/deployment.yml.j2"
   loop: "{{ deployments }}"
   tags:
     - deployment
