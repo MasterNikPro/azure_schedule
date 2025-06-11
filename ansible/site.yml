@@ -5,3 +5,9 @@
     master_node: k3s-master-1
   roles: 
     - install_k3s
+
+- name: K3s - app deploy
+  hosts: kubernetes_workers
+  become: yes
+  roles: 
+    - k3s_deploy
