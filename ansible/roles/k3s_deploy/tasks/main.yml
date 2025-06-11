@@ -1,0 +1,15 @@
+- name: Deploy Service
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/templates/service.yaml.j2"
+  loop: "{{ services }}"
+  tags:
+    - service
+
+- name: Deploy Deployment
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/templates/deployment.yaml.j2"
+  loop: "{{ deployments }}"
+  tags:
+    - deployment
