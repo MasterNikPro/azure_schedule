@@ -5,3 +5,11 @@
     master_node: k3s-master-1
   roles: 
     - install_k3s
+
+- name: K3s - frontend
+  hosts: k3s-master-1
+  become: yes
+  vars:
+    master_node: k3s-master-1
+  roles: 
+    - k3s_frontend
