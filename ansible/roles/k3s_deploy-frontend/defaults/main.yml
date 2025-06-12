@@ -1,5 +1,4 @@
 ---
-# Default configurations
 namespaces: [
     {
       "name": "lab"
