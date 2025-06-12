@@ -9,3 +9,15 @@
   become: yes
   roles:
     - k3s_deploy-frontend
+
+- name: K3s - redis
+  hosts: "{{ groups['kubernetes_workers'][1] }}"
+  become: yes
+  roles:
+    - k3s_deploy-redis
+
+- name: K3s - backend
+  hosts: "{{ groups['kubernetes_workers'][2] }}"
+  become: yes
+  roles:
+    - k3s_deploy-backend
