@@ -1,0 +1,30 @@
+---
+namespaces: [
+    {
+      "name": "lab"
+    }
+]
+services: [
+  {
+    "name": "redis-svc",
+    "app": "redis",
+    "type": "ClusterIP",
+    "port": 6379,
+    "target_port": 6379,
+    "protocol": "TCP",
+    "namespace": "lab"
+  }
+]
+deployments:  [
+  {
+    "name": "redis",
+    "app": "redis",
+    "registry": "dockerhub",
+    "image": "redis:7-alpine",
+    "replicas": 1,
+    "port": 6379,
+    "config_refs": [],
+    "secret_refs": [],
+    "namespace": "lab"
+  }
+]

@@ -71,9 +71,9 @@ resource "azurerm_linux_virtual_machine" "main" {
     public_key = join("\n", var.ssh_keys)
   }
 
-  boot_diagnostics {
-    storage_account_uri = var.storage_account_uri
-  }
+  # boot_diagnostics {
+  #   storage_account_uri = var.storage_account_uri
+  # }
 
   tags = {
     name = "${each.value.name}-linux-vm"

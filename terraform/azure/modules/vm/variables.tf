@@ -54,4 +54,4 @@ variable "os_image" {
   }))
 }
 
-variable "storage_account_uri" {}
+# variable "storage_account_uri" {}

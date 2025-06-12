@@ -1,31 +1,20 @@
-- name: install pip3
-  apt: 
-    update_cache: yes
-    pkg: 
-      - python3-pip 
-
-    state: present
-
-- name: install pre-requisites
-  pip:
-    name:
-      - openshift
-      - pyyaml
-      - kubernetes 
-
 - name: Create a k8s namespace
   kubernetes.core.k8s:
-    name: "{{ item.name }}"
     api_version: v1
     kind: Namespace
+    name: "{{ item.name }}"
     state: present
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
   loop: "{{ namespaces }}"
   tags: namespaces
 
 - name: Deploy ConfigMap
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/configmap.yml.j2"
+    template: "{{ role_path }}/../templates/configmap.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
   loop: "{{ configmaps }}"
   tags:
     - configmap
@@ -33,7 +22,9 @@
 - name: Deploy Secret
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/secrets.yml.j2"
+    template: "{{ role_path }}/../templates/secrets.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
   loop: "{{ secrets }}"
   tags:
     - secret
@@ -41,7 +32,9 @@
 - name: Deploy Service
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/service.yml.j2"
+    template: "{{ role_path }}/../templates/service.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
   loop: "{{ services }}"
   tags:
     - service
@@ -49,7 +42,9 @@
 - name: Deploy Deployment
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/templates/deployment.yml.j2"
+    template: "{{ role_path }}/../templates/deployment.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
   loop: "{{ deployments }}"
   tags:
     - deployment

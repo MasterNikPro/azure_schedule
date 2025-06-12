@@ -71,6 +71,20 @@ for role in "${KEY_VAULT_ROLES[@]}"; do
 done
 echo
 #########################################################################
+azureLoggin() {
+	echo "=== Logging... ===" 
+	AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
+	AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
+	AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
+
+	az login --service-principal \
+		--username "$AZURE_CLIENT_ID" \
+		--password "$AZURE_CLIENT_SECRET" \
+		--tenant "$AZURE_TENANT_ID"
+	echo
+}
+azureLoggin
+#########################################################################
 check_secret_exists() {
     az keyvault secret show --vault-name "$1" --name "$2"
 }
@@ -135,20 +149,6 @@ ACCOUNT_KEY=$(az storage account keys list \
 	--resource-group "$RESOURCE_GROUP" \
 	--account-name "$STORAGE_ACCOUNT_NAME" \
 	--query "[0].value" -o tsv)
-#########################################################################
-azureLoggin() {
-	echo "=== Logging... ===" 
-	AZURE_CLIENT_ID=$(grep -oP '"appId":\s*"\K[^"]+' $KEY_FILE)
-	AZURE_CLIENT_SECRET=$(grep -oP '"password":\s*"\K[^"]+' $KEY_FILE)
-	AZURE_TENANT_ID=$(grep -oP '"tenant":\s*"\K[^"]+' $KEY_FILE)
-
-	az login --service-principal \
-		--username "$AZURE_CLIENT_ID" \
-		--password "$AZURE_CLIENT_SECRET" \
-		--tenant "$AZURE_TENANT_ID"
-	echo
-}
-azureLoggin
 #########################################################################
 startTerraform() {
 	echo "🚀 STARTING TERRAFORM"

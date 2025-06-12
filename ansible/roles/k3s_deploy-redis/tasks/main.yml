@@ -1,0 +1,30 @@
+- name: Create a k8s namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ item.name }}"
+    state: present
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
+  loop: "{{ namespaces }}"
+  tags: namespaces
+
+- name: Deploy Service
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/../templates/service.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
+  loop: "{{ services }}"
+  tags:
+    - service
+
+- name: Deploy Deployment
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/../templates/deployment.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
+  loop: "{{ deployments }}"
+  tags:
+    - deployment

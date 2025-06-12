@@ -1,13 +1,23 @@
 - name: Install k3s
   hosts: kubernetes_workers
   become: yes
-  vars:
-    master_node: k3s-master-1
   roles: 
     - install_k3s
 
-- name: K3s - app deploy
-  hosts: kubernetes_workers
+- name: K3s - frontend
+  hosts: "{{ groups['kubernetes_workers'][0] }}"
   become: yes
-  roles: 
-    - k3s_deploy
+  roles:
+    - k3s_deploy-frontend
+
+- name: K3s - redis
+  hosts: "{{ groups['kubernetes_workers'][1] }}"
+  become: yes
+  roles:
+    - k3s_deploy-redis
+
+- name: K3s - backend
+  hosts: "{{ groups['kubernetes_workers'][2] }}"
+  become: yes
+  roles:
+    - k3s_deploy-backend

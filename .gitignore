@@ -27,8 +27,7 @@ ansible/inventory/
 terraform.rc
 
 # Ignore JSON files
-config.json
-keys.json
+*.json*
 
 # Ignore IDE files
 .idea/
