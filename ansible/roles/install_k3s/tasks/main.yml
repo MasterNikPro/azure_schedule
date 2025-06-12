@@ -18,3 +18,18 @@
   debug:
     msg: "Node: {{ inventory_hostname }} - {{ k3s_output.stdout }}"
   ignore_errors: true
+
+- name: install pip3
+  apt: 
+    update_cache: yes
+    pkg: 
+      - python3-pip 
+
+    state: present
+
+- name: install pre-requisites
+  pip:
+    name:
+      - openshift
+      - pyyaml
+      - kubernetes 
