@@ -11,7 +11,7 @@ configmaps: [
       DB_HOST: "my-infra-maindb-dev.postgres.database.azure.com",
       DB_PORT: "5432",
       DB_NAME: "postgres?sslmode=require",
-      REDIS_HOST: "",
+      REDIS_HOST: "redis-svc",
       REDIS_PORT: "6379"
     },
     "namespace": "lab"
