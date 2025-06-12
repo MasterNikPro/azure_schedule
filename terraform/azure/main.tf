@@ -12,7 +12,7 @@ module "vm" {
   vm_instances_size_map       = local.config.vm_instances_size_map
   os_disk                     = local.config.os_disk
   os_image                    = local.config.os_image
-  storage_account_uri         = module.vm_monitoring.storage_account_uri
+  # storage_account_uri         = module.vm_monitoring.storage_account_uri
 
   depends_on = [module.networks]
 }
@@ -67,17 +67,19 @@ module "load_balancer" {
   depends_on     = [module.networks]
 }
 
-module "vm_monitoring" {
-  source = "./modules/vm_monitoring"
+# module "vm_monitoring" {
+#   source = "./modules/vm_monitoring"
 
-  resource_group_name_azurerm     = local.config.project.resource_group_name_azurerm
-  location_azurerm                = local.config.project.location_azurerm
-  diagnostic_storage_account_name = local.config.project.diagnostic_storage_account_name
-  log_analytics_workspace         = local.config.log_analytics_workspace
-  vm_ids                          = module.vm.vm_ids
-  monitor_metric_alert            = local.config.monitor_metric_alert
-  monitor_action_group            = local.config.monitor_action_group
-}
+#   resource_group_name_azurerm     = local.config.project.resource_group_name_azurerm
+#   location_azurerm                = local.config.project.location_azurerm
+#   diagnostic_storage_account_name = local.config.project.diagnostic_storage_account_name
+#   log_analytics_workspace         = local.config.log_analytics_workspace
+#   vm_ids                          = module.vm.vm_ids
+#   monitor_metric_alert            = local.config.monitor_metric_alert
+#   monitor_action_group            = local.config.monitor_action_group
+
+#   depends_on = [module.vm]
+# }
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tpl", {
