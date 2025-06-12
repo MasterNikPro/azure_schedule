@@ -5,6 +5,7 @@ resource "azurerm_public_ip" "main" {
   location            = var.location_azurerm
   resource_group_name = var.resource_group_name_azurerm
   allocation_method   = each.value.allocation_method
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "main" {

@@ -54,3 +54,8 @@ output "container_registry_names" {
 output "load_balancer_name" {
   value = module.load_balancer.debug_lb
 }
+
+output "load_balancer_public_ip" {
+  description = "Public IP address of the load balancer for HTTP/HTTPS traffic"
+  value       = module.load_balancer.load_balancer_public_ip
+}
