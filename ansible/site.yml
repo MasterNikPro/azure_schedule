@@ -10,4 +10,4 @@
   hosts: kubernetes_workers
   become: yes
   roles: 
-    - k3s_deploy
+    - k3s_deploy-frontend
