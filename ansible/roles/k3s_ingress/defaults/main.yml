@@ -1,0 +1,11 @@
+---
+namespaces: [
+    {
+      "name": "lab"
+    }
+]
+ingress:  [
+  {
+    
+  }
+]

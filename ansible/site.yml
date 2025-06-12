@@ -21,3 +21,9 @@
   become: yes
   roles:
     - k3s_deploy-backend
+
+- name: K3s - ingress
+  hosts: "{{ groups['kubernetes_workers'][2] }}"
+  become: yes
+  roles:
+    - k3s_ingress

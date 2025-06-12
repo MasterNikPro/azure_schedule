@@ -1,0 +1,9 @@
+- name: Deploy Ingress
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ role_path }}/../templates/ingress.yml.j2"
+    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    verify_ssl: no
+  # loop: "{{ ingress }}"
+  tags:
+  - ingress
