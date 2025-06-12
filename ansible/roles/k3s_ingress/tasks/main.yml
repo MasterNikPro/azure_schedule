@@ -1,9 +1,34 @@
-- name: Deploy Ingress
+- name: Create the Ingress resource
   kubernetes.core.k8s:
     state: present
-    template: "{{ role_path }}/../templates/ingress.yml.j2"
-    kubeconfig: "/etc/rancher/k3s/k3s.yaml"
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: cluster-ingress
+        namespace: lab
+        annotations:
+          kubernetes.io/ingress.class: "traefik"
+          traefik.ingress.kubernetes.io/rule-type: "PathPrefixStrip"
+      spec:
+        rules:
+          - http:
+              paths:
+                - path: /api
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: backend-svc
+                      port:
+                        number: 80
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: frontend-svc
+                      port:
+                        number: 80
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
     verify_ssl: no
-  # loop: "{{ ingress }}"
   tags:
-  - ingress
+    - ingress
