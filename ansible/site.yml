@@ -5,7 +5,7 @@
     - install_k3s
 
 - name: K3s - frontend
-  hosts: kubernetes_workers
+  hosts: "{{ groups['kubernetes_workers'][0] }}"
   become: yes
-  roles: 
+  roles:
     - k3s_deploy-frontend
