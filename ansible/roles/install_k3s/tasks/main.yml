@@ -13,7 +13,7 @@
 
 - name: Install k3s server and join the cluster on other nodes
   shell: |
-    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --server https://{{ hostvars[groups['kubernetes_workers'][0]]['ansible_host'] }}:6443" K3S_TOKEN={{ k3s_token.stdout }} sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --server https://{{ hostvars[groups['kubernetes_workers'][0]]['private_ip'] }}:6443" K3S_TOKEN={{ k3s_token.stdout }} sh -
   when: inventory_hostname != groups['kubernetes_workers'][0]
 
 - name: Verify k3s installation on each node
