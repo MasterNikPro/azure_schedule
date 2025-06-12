@@ -20,6 +20,7 @@ variable "database_instances" {
     allow_public_access           = optional(bool, false)
     start_ip_address              = optional(string, "0.0.0.0")
     end_ip_address                = optional(string, "255.255.255.255")
+    azure_zone                    = optional(number, 1)
   }))
   default = {}
 }

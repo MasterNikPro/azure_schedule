@@ -26,3 +26,11 @@ output "kubernetes_workers" {
     }
   ]
 }
+
+output "vm_network_interface_ip_configs" {
+  description = "Map of VM network interface IDs for load balancer backend pool"
+  value = {
+    for vm_name, nic in azurerm_network_interface.main :
+    vm_name => nic.id
+  }
+}

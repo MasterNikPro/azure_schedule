@@ -61,10 +61,11 @@ module "container_registry" {
 }
 
 module "load_balancer" {
-  source         = "./modules/loadbalancer"
-  load_balancer  = local.load_balancer
-  project_values = local.project_values
-  depends_on     = [module.networks]
+  source                = "./modules/loadbalancer"
+  load_balancer         = local.load_balancer
+  project_values        = local.project_values
+  vm_network_interfaces = module.vm.vm_network_interface_ip_configs
+  depends_on            = [module.networks, module.vm]
 }
 
 module "vm_monitoring" {
@@ -81,10 +82,11 @@ module "vm_monitoring" {
 
 resource "local_file" "ansible_inventory" {
   content = templatefile("${path.module}/inventory.tpl", {
-    kubernetes_workers = module.vm.kubernetes_workers
-    acr_name           = module.container_registry.registry_names
+    kubernetes_workers      = module.vm.kubernetes_workers
+    acr_name               = module.container_registry.registry_names
+    load_balancer_public_ip = module.load_balancer.load_balancer_public_ip
   })
   filename = "${path.module}/../../ansible/inventory/inventory.ini"
 
-  depends_on = [module.vm, module.container_registry]
+  depends_on = [module.vm, module.container_registry, module.load_balancer]
 }

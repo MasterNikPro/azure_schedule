@@ -10,6 +10,11 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 acr_name=${values(acr_name)[0]}
 acr_server=${values(acr_name)[0]}.azurecr.io
 
+# Load Balancer Configuration
+load_balancer_public_ip=${load_balancer_public_ip}
+load_balancer_http_url=http://${load_balancer_public_ip}
+load_balancer_https_url=https://${load_balancer_public_ip}
+
 [kubernetes_workers]
 %{ for idx, worker in kubernetes_workers ~}
 ${worker.name} ansible_host=${worker.public_ip != "" ? worker.public_ip : worker.private_ip} 

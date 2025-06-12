@@ -13,3 +13,10 @@ variable "load_balancer" {
 variable "project_values" {
   type = map(string)
 }
+
+# New variable for VM network interfaces
+variable "vm_network_interfaces" {
+  description = "Map of VM network interface IDs for backend pool association"
+  type        = map(string)
+  default     = {}
+}
