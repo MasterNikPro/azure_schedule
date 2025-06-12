@@ -1,18 +1,3 @@
-- name: install pip3
-  apt: 
-    update_cache: yes
-    pkg: 
-      - python3-pip 
-
-    state: present
-
-- name: install pre-requisites
-  pip:
-    name:
-      - openshift
-      - pyyaml
-      - kubernetes 
-
 - name: Create a k8s namespace
   kubernetes.core.k8s:
     name: "{{ item.name }}"
