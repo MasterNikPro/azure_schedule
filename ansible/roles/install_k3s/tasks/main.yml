@@ -1,6 +1,6 @@
 - name: Install k3s server on the first node
   shell: |
-    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init" sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --cluster-init --tls-san {{ load_balancer_public_ip }}" sh -
   when: inventory_hostname == groups['kubernetes_workers'][0]
 
 - name: Install k3s server and join the cluster on other nodes
@@ -12,11 +12,6 @@
   command: kubectl get nodes
   register: k3s_output
   changed_when: false
-  ignore_errors: true
-
-- name: Show k3s nodes on each VM
-  debug:
-    msg: "Node: {{ inventory_hostname }} - {{ k3s_output.stdout }}"
   ignore_errors: true
 
 - name: install pip3
