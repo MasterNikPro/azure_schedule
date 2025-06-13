@@ -27,13 +27,13 @@
           - host: schedule.devops.pp.ua
             http:
               paths:
-                - path: /()(.*)
+                - path: /api(/|$)(.*)
                   pathType: ImplementationSpecific
                   backend:
                     service:
-                      name: frontend-svc
+                      name: backend-svc
                       port:
-                        number: 80
+                        number: 8080
                 - path: /(.*)
                   pathType: ImplementationSpecific
                   backend:
