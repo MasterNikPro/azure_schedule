@@ -1,0 +1,47 @@
+- name: Create the Ingress resource
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: cluster-ingress
+        namespace: lab
+        uid: 7e05efa7-dad2-4bcf-98ae-ff106efbb43c
+        resourceVersion: '45188'
+        generation: 3
+        creationTimestamp: '2025-06-12T20:50:43Z'
+        labels:
+          k8slens-edit-resource-version: v1
+        annotations:
+          nginx.ingress.kubernetes.io/use-regex: 'true'
+          nginx.ingress.kubernetes.io/rewrite-target: /$2
+        selfLink: /apis/networking.k8s.io/v1/namespaces/lab/ingresses/cluster-ingress
+      status:
+        loadBalancer:
+          ingress:
+            - ip: 10.43.8.87
+      spec:
+        ingressClassName: nginx
+        rules:
+          - host: schedule.devops.pp.ua
+            http:
+              paths:
+                - path: /api(/|$)(.*)
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: backend-svc
+                      port:
+                        number: 8080
+                - path: /(.*)
+                  pathType: ImplementationSpecific
+                  backend:
+                    service:
+                      name: frontend-svc
+                      port:
+                        number: 80
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    verify_ssl: no
+  tags:
+    - ingress
